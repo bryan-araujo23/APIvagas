@@ -33,7 +33,7 @@ class VagaList(APIView):
 
 
 class VagaDetalhes(APIView):
-    def get(self, request, pk):
+    def get(self, request, pk):  # solicita todos DETALHES do OBJETO VAGA banco de dados pela pk
         try:
             if pk == "0":
                 return JsonResponse({'mensagem': "O ID deve ser maior que zero."},
@@ -52,7 +52,7 @@ class VagaDetalhes(APIView):
     def put(self, request, pk):
         try:
             if pk == "0":
-                return JsonResponse({'mensagem': "O ID deve ser maior que 0"},
+                return JsonResponse({'mensagem': "O ID deve ser maior que zero."},
                                     status=status.HTTP_400_BAD_REQUEST)
             vaga = Vaga.objects.get(pk=pk)
             serializer = VagaSerializer(vaga, data=request.data)
@@ -60,13 +60,28 @@ class VagaDetalhes(APIView):
                 serializer.save()
                 return Response(serializer.data)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
         except Vaga.DoesNotExist:
-            return JsonResponse({'mensagem': "A vaga não existe"}, 
+            return JsonResponse({'mensagem': "A vaga não existe"},
+                                status=status.HTTP_404_NOT_FOUND)
+        except Exception:
+            return JsonResponse({'mensagem': "Ocorreu um erro no servidor"},
                                 status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
             
-
+    def delete(self, request, pk):
+        try:
+            if pk == "0":
+                return JsonResponse({'mensagem': "O ID deve ser maior que zero."},
+                                    status=status.HTTP_400_BAD_REQUEST)
+            vaga = Vaga.objects.get(pk=pk)
+            vaga.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Vaga.DoesNotExist:
+            return JsonResponse({'mensagem': "A vaga não existe"},
+                                status=status.HTTP_404_NOT_FOUND)
+        except Exception:
+            return JsonResponse({'mensagem': "Ocorreu um erro no servidor"},
+                                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 
