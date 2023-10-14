@@ -2,6 +2,7 @@ from django.shortcuts import render
 from .serializers import VagaSerializer
 from django.http import JsonResponse
 from .models import Vaga
+from .pagination import PaginacaoVagas 
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -13,8 +14,10 @@ class VagaList(APIView):
     def get(self, request):           # Exibir todos registros do nosso banco de dados
         try:            
             lista_vagas = Vaga.objects.all()
-            serializer = VagaSerializer(lista_vagas, many=True)
-            return Response(serializer.data)
+            paginator = PaginacaoVagas()
+            result_page = paginator.paginate_queryset(lista_vagas, request)
+            serializer = VagaSerializer(result_page, many=True)
+            return paginator.get_paginated_response(serializer.data)
         except Exception:
             return JsonResponse({'mensagem': "Ocorreu um erro no servidor"},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
